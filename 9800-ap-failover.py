@@ -13,14 +13,26 @@ import time
 from getpass import getpass
 
 
-restconf_headers={
+restconf_headers = {
     "Accept": "application/yang-data+json",
-    "Content-Type": "application/yang-data+json"
+    "Content-Type": "application/yang-data+json",
 }
 controllers = [
-    {"index": "index-primary", "controller-name": "D1-9800-1", "ipaddr": "10.1.40.11"},
-    {"index": "index-secondary", "controller-name": "D2-9800-1", "ipaddr": "10.5.40.11"},
-    {"index": "index-tertiary", "controller-name": "TEST", "ipaddr": "192.168.255.1"}
+    {
+        "index": "index-primary",
+        "controller-name": "D1-9800-1",
+        "ipaddr": "10.1.40.11"
+    },
+    {
+        "index": "index-secondary",
+        "controller-name": "D2-9800-1",
+        "ipaddr": "10.5.40.11",
+    },
+    {
+        "index": "index-tertiary",
+        "controller-name": "TEST",
+        "ipaddr": "192.168.255.1"
+    },
 ]
 
 
@@ -30,11 +42,13 @@ def get_access_points(host, username, password):
     """
     with httpx.Client(verify=False, timeout=5.0) as client:
         response = client.get(
-            url=f"https://{host}:443/restconf/data/Cisco-IOS-XE-wireless-access-point-oper:" \
-                "access-point-oper-data/capwap-data",
-            params={"fields": "ip-addr;name;device-detail/static-info/board-data/wtp-enet-mac"},
+            url=f"https://{host}:443/restconf/data/Cisco-IOS-XE-wireless-access-point-oper:"
+            "access-point-oper-data/capwap-data",
+            params={
+                "fields": "ip-addr;name;device-detail/static-info/board-data/wtp-enet-mac"
+            },
             headers=restconf_headers,
-            auth=(username, password)
+            auth=(username, password),
         )
     return response
 
@@ -43,22 +57,19 @@ def main():
     """
     function docstring
     """
-    #restconf_username = input("enter in restconf username\n> ")
-    #restconf_password = getpass("enter in restconf password\n> ")
-    #restconf_host = input("enter in host name or ipv4 address\n> ")
-    restconf_username = 'ejwilkerson'
-    restconf_password = 'L0ck3r!291537'
-    restconf_host = '10.1.40.11'
-    print("getting access points...")
+    restconf_username = input("enter in restconf username\n> ")
+    restconf_password = getpass("enter in restconf password\n> ")
+    restconf_host = input("enter in host name or ipv4 address\n> ")
     start_time = time.time()
-    access_points_response = get_access_points(restconf_host, restconf_username, restconf_password)
+    print("getting access points...")
+    access_points_response = get_access_points(
+        restconf_host, restconf_username, restconf_password
+    )
     if access_points_response.status_code == 200:
-        access_points_raw = json.loads(access_points_response.text)[
+        access_points = json.loads(access_points_response.text)[
             "Cisco-IOS-XE-wireless-access-point-oper:capwap-data"
         ]
-        access_points = [i for i in access_points_raw if i['ip-addr'].startswith('10.58')]
-        print(f"{len(access_points)} access points found\nconfiguring access points...")
-
+        print(f"{len(access_points)} access points found!\nconfiguring access points...")
         num_pass = 0
         num_fail = 0
         with httpx.Client(verify=False, timeout=5.0) as client:
@@ -66,12 +77,9 @@ def main():
                 controller_error = False
                 for controller in controllers:
                     response = client.post(
-                        url=f"https://{restconf_host}:443/restconf/data/Cisco-IOS-XE-wireless-" \
-                            "access-point-cfg-rpc:set-ap-controller",
-                        headers={
-                            "Accept": "application/yang-data+json", 
-                            "Content-Type": "application/yang-data+json"
-                        },
+                        url=f"https://{restconf_host}:443/restconf/data/" \
+                            "Cisco-IOS-XE-wireless-access-point-cfg-rpc:set-ap-controller",
+                        headers=restconf_headers,
                         auth=(restconf_username, restconf_password),
                         data=json.dumps(
                             {
@@ -80,10 +88,10 @@ def main():
                                     "controller-name": controller["controller-name"],
                                     "index": controller["index"],
                                     "ipaddr": controller["ipaddr"],
-                                    "ap-name": access_point["name"]
+                                    "ap-name": access_point["name"],
                                 }
                             }
-                        )
+                        ),
                     )
                     if response.status_code != 204:
                         controller_error = True
@@ -95,7 +103,7 @@ def main():
                     num_pass += 1
         end_time = time.time()
         run_time = round((end_time - start_time), 2)
-        print("\ncompleted!")
+        print("completed!")
         print(f"{len(access_points)} access points configured in {run_time} seconds")
         print(f"succeeded={str(num_pass)}  failed:={str(num_fail)}")
     else:
@@ -106,6 +114,8 @@ if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
+        print("\nuser has exited script")
+    except RuntimeError:
         print("\nuser has exited script")
     except httpx.ConnectTimeout:
         print("timed out")
