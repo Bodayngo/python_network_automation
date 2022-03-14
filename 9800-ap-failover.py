@@ -57,9 +57,9 @@ def main():
     """
     function docstring
     """
-    restconf_username = input("enter in restconf username\n> ")
-    restconf_password = getpass("enter in restconf password\n> ")
-    restconf_host = input("enter in host name or ipv4 address\n> ")
+    restconf_username = input("enter in controller HTTP/HTTPS username\n> ")
+    restconf_password = getpass("enter in controller HTTP/HTTPS password\n> ")
+    restconf_host = input("enter in controller FQDN or IPv4 address\n> ")
     start_time = time.time()
     print("getting access points...")
     access_points_response = get_access_points(
