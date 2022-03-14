@@ -105,7 +105,7 @@ def main():
         run_time = round((end_time - start_time), 2)
         print("completed!")
         print(f"{len(access_points)} access points configured in {run_time} seconds")
-        print(f"succeeded={str(num_pass)}  failed:={str(num_fail)}")
+        print(f"succeeded={str(num_pass)}  failed={str(num_fail)}")
     else:
         print(access_points_response)
 
