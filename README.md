@@ -2,13 +2,13 @@
 1. Clone the remote Git repository
 ```
 cd ~
-git clone git@gaspeite.scheelssports.pvt:network-admins/nornir.git
+git clone git@github.com:Bodayngo/python_network_automation.git
 ```
 
 2. Create and activate Python virtual environment
 ```
 cd nornir
-python3.8 -m venv nornir-venv
+python3 -m venv nornir-venv
 source nornir-venv/bin/activate
 ```
 
