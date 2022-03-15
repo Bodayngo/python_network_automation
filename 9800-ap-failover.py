@@ -71,7 +71,7 @@ def filter_access_points(aps):
     filtered_aps = [ap for ap in aps if ap["ip-addr"].startswith(ap_filter)]
     if len(filtered_aps) != 0:
         return filtered_aps
-    print("no access points targeted with filter")
+    print(f"no access points found with filter: '{ap_filter}'")
     return None
 
 
