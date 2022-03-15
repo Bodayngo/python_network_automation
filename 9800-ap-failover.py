@@ -16,23 +16,6 @@ restconf_headers = {
     "Accept": "application/yang-data+json",
     "Content-Type": "application/yang-data+json",
 }
-controllers = [
-    {
-        "index": "index-primary",
-        "controller-name": "D1-9800-1",
-        "ipaddr": "10.1.40.11"
-    },
-    {
-        "index": "index-secondary",
-        "controller-name": "D2-9800-1",
-        "ipaddr": "10.5.40.11"
-    },
-    {
-        "index": "index-tertiary",
-        "controller-name": "TEST",
-        "ipaddr": "192.168.255.1"
-    }
-]
 
 
 def get_access_points(host, uname, passwd):
@@ -87,7 +70,9 @@ def main():
         filtered_aps = filter_access_points(aps)
         if filtered_aps:
             for ap in filtered_aps:
-                print(f"{ap['name']:<18} {ap['ip-addr']:<18}")
+                ap_name = ap['name']
+                print(ap_name)
+
 
 
 if __name__ == "__main__":
