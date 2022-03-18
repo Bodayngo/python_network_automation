@@ -37,7 +37,29 @@ def filter_access_points(aps):
             user_confirm = input(f"{len(filtered_aps)} access points targeted with filter: '{ap_filter}'\nproceed? [y] ")
             if user_confirm.strip().lower() == 'y':
                 return filtered_aps
-        print(f"no access points found with filter: '{ap_filter}'")
+        else:
+            print(f"no access points found with filter: '{ap_filter}'")
+
+
+def clear_access_point_config(host, username, password, access_points):
+    """
+    function docstring
+    """
+    with httpx.Client(base_url=f"https://{host}:443/restconf/data", verify=False, timeout=5.0) as client:
+        for access_point in access_points:
+            data = {
+                "Cisco-IOS-XE-wireless-access-point-cmd-rpc:clear-ap-config": {
+                    "operation-type": "ap-clear-config",
+                    "ap-name": f"{access_point['name']}"
+                }
+            }
+            response = client.post(
+                url="/Cisco-IOS-XE-wireless-access-point-cmd-rpc:clear-ap-config",
+                headers=restconf_headers,
+                auth=(username, password),
+                data=json.dumps(data)
+            )
+            print(str(response) + ' : ' +  response.text)
 
 
 def main():
@@ -54,14 +76,15 @@ def main():
             headers=restconf_headers,
             auth=(username, password)
         )
-        if get_access_points_response.status_code == 200:
-            access_points = json.loads(get_access_points_response.text)["Cisco-IOS-XE-wireless-access-point-oper:capwap-data"]
-            filtered_access_points = filter_access_points(access_points)
-            if filtered_access_points:
-                for access_point in filtered_access_points:
-                    print(access_point['name'])
-        else:
-            print("unable to get access points")
+    if get_access_points_response.status_code == 200:
+        access_points = json.loads(get_access_points_response.text)["Cisco-IOS-XE-wireless-access-point-oper:capwap-data"]
+        filtered_access_points = filter_access_points(access_points)
+        if filtered_access_points:
+            for access_point in filtered_access_points:
+                clear_access_point_config(host, username, password, filtered_access_points)
+                print(access_point['name'])
+    else:
+        print("unable to get access points")
 
 
 if __name__ == "__main__":
