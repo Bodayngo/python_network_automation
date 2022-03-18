@@ -238,7 +238,11 @@ def main():
   [3]  configure access point tags
 > """).strip())
             if config_menu_input == 0:
-                factory_reset_access_points(host, username, password, filtered_access_points)
+                print(f"factory reset {len(filtered_access_points)} access points? [y]")
+                user_confirm = input("> ")
+                if user_confirm.lower().strip() == 'y':
+                    factory_reset_access_points(host, username, password, filtered_access_points)
+                    break
                 break
             if config_menu_input == 1:
                 config_access_point_names(host, username, password, filtered_access_points)
